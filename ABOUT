@@ -1,0 +1,8 @@
+This directory contains *two* separate google apps scripts files.
+
+We may do away with one eventually, but for now I have the code essentially duplicated on
+two sides:
+
+1. Container-attached script
+2. Non-container-attached script (possibly for a future add-on).
+
