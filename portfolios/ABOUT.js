@@ -1,3 +1,6 @@
+/* The master _container-attached_ version lives here:
+     https://script.google.com/u/0/home/projects/1IObyT1O-hF2nmW06_GY876osz2u7a8-mi_oxrgr3Lh9FyJ5b-PV_5i72/edit   
+*/
 /**
  * The "original" version of this code should live here:
  * https://script.google.com/home/projects/1ZQMR69J7grWC5au0ljGgoczGa48H4W4QW8ceKnQ0Nu3mKEMdza_xw6ZK/edit
@@ -11,6 +14,3 @@
  * by hand!
  */
 
-/* The master _container-attached_ version lives here:
-     https://script.google.com/u/0/home/projects/1IObyT1O-hF2nmW06_GY876osz2u7a8-mi_oxrgr3Lh9FyJ5b-PV_5i72/edit   
-*/
