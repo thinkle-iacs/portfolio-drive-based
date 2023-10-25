@@ -6,8 +6,8 @@ function getPortfolioUrl (sid, title, yog, email) {
   let existing = portfolioDataSheet.getRow(sid);  
   if (existing) {
     return existing.url;
-  } else if (title && yog && email) {
-    return createPortfolio(title,yog,email);    
+  } else if (title && yog && email) {    
+    return createPortfolio(title,yog,sid,email);    
   }
 }
 
@@ -74,7 +74,7 @@ function getYOGFolder (yog) {
 
 function getPortfolioDataSheet () {
   let portfolioSheet = getPortfolioSpreadsheet();
-  return DataSheet(portfolioSheet,"Portfolios",["sid","email","title","yog","url"],'sid');
+  return DataSheet(portfolioSheet,"Portfolios",["sid","email","title","yog","url","shared"],'sid');
 }
 
 function setupCoreSheet () {
@@ -96,8 +96,33 @@ function createPortfolio (title, yog, sid, email) {
   let url = portfolioFolder.getUrl()
   portfolioDataSheet.updateRow(
     {url,email,title,yog,sid}
-  );
+  );  
   return url;
+}
+
+function sharePortfolio (sid) {
+  let dataSheet = getPortfolioDataSheet();
+  let row = dataSheet.getRow(sid);
+  if (!row) {
+    throw Error(`Portfolio not found for ${sid}`);
+  }
+  let folder = getPortfolioFolder(sid);
+  let result = Drive.Permissions.insert(
+        {role:'writer',
+        type:'user',
+        value:row.email},
+        folder.getId(),
+        {
+          sendNotificationsEmail : 'true',
+          emailMessage : "This google drive folder is your portfolio. Please add a shortcut to it to your drive so you'll be able to find it and add to it when your teachers ask you to."
+        }
+  );
+  dataSheet.updateRow({...row,shared:true})
+  return result;
+}
+
+function testShare () {
+  sharePortfolio('22179');
 }
 
 function test () {
