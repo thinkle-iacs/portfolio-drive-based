@@ -7,7 +7,7 @@ function getPortfolioUrl (sid, title, yog, email) {
   if (existing) {
     return existing.url;
   } else if (title && yog && email) {
-    return createPortfolio(title,yog,email);    
+    return createPortfolio(title,yog,sid, email);    
   }
 }
 
