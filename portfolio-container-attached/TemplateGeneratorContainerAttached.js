@@ -37,11 +37,18 @@ function addTemplatesInteractive () {
   let templateDataSheet = getContainerTemplateSheet();
   for (let rn=1; rn<templateDataSheet.length; rn++) {
     let row = templateDataSheet[rn];
-    if (!row[COMPLETE]) {
+    if (!row[COMPLETE] && row[TURL]) {
       console.log('Add template for row:',row[SID],row[TURL],row[PARENTS]);
-      let parents = row[PARENTS].split(/\s*,\s*/);
-      console.log('Parnets:',parents)
-      let success = addTemplate(row[SID],row[TURL],parents,row[NAME]);
+      let parents = row[PARENTS].split(/\s*,\s*/).filter((p)=>p);
+      console.log('Parents:',parents)
+      let success;
+      try {
+        success = addTemplate(row[SID],row[TURL],parents,row[NAME]);
+      } catch (err) {
+        console.log('Ran into error with row',row);
+        console.log(err);
+        row[COMPLETE] = "ERROR: "+err;
+      }
       if (success) {
         row[COMPLETE] = success;
       } else {
