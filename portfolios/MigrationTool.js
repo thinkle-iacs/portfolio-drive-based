@@ -9,16 +9,7 @@
  * => If it does not exist, we will REMOVE it from the folder.
  */
 
-const MIGRATION_COLUMNS = [
-  "sid",
-  "email",
-  "url",
-  "title",
-  "yog",
-  "share",
-  "shared",
-  "migrated",
-];
+const MIGRATION_COLUMNS = ["sid", "email", "url", "title", "yog", "migrated"];
 
 function migrateOldPortfolios() {
   let portfolioSheet = getPortfolioSpreadsheet();
@@ -32,24 +23,17 @@ function migrateOldPortfolios() {
     if (!row.migrated) {
       let sitesInfo = validateSitesUrl(row.url);
       if (sitesInfo) {
-        let doc = createSitesDoc(row.title, sitesInfo.url, sitesInfo.title);
         let folder = getPortfolioFolder(row.sid, row.title, row.yog, row.email);
-        doc.moveTo(folder);
-        row.migrated = folder.getUrl();
-      }
-    }
-    if (row.share) {
-      let folder = getPortfolioFolder(row.sid, row.title, row.yog, row.email);
-      let result = Drive.Permissions.insert(
-        { role: "writer", type: "user", value: row.email },
-        folder.getId(),
-        {
-          sendNotificationsEmail: "true",
-          emailMessage:
-            "Hello from the new portfolio tool. This google drive folder is your portfolio. Please add a shortcut to it to your drive so you'll be able to find it and add to it when your teachers ask you to. Please do not delete this folder or move it. If you're getting this, you're probably in Mr. Hinkle's advisory because he's just testing this out for the first time :-)",
+        if (folder) {
+          let doc = createSitesDoc(row.title, sitesInfo.url, sitesInfo.title);
+          doc.moveTo(folder);
+          row.migrated = folder.getUrl();
+        } else {
+          row.migrated = "Portfolio not found/created";
         }
-      );
-      row.shared = result;
+      } else {
+        row.migrated = 'Unable to access/validate site :-('
+      }
     }
   }
 }
@@ -84,7 +68,7 @@ function validateSitesUrl(url) {
       };
     }
   } catch (err) {
-    console.log("Hit error", err);
+    console.error(`Hit error fetching url ${url}`, err);
     return null;
   }
 }
