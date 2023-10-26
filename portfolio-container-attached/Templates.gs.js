@@ -19,8 +19,17 @@ function addTemplate(sid, templateUrl, parentNames, suffix = "") {
     if (suffix) {
       suffix = ` ${suffix}`;
     }
-    let copy = original.makeCopy(original.getName() + suffix, folder);
-    return copy.getUrl();
+    let targetName = original.getName() + suffix;
+    // Check if a file with the target name already exists
+    let existingFiles = folder.getFilesByName(targetName);
+    if (existingFiles.hasNext()) {
+      // File already exists, return its URL
+      return existingFiles.next().getUrl();
+    } else {
+      // File doesn't exist, make a copy
+      let copy = original.makeCopy(targetName, folder);
+      return copy.getUrl();
+    }
   } else {
     return false;
   }
