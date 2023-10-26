@@ -13,8 +13,18 @@ function getPortfolioUrl(sid, title, yog, email) {
 
 function getPortfolioFolder(sid, title, yog, email) {
   let url = getPortfolioUrl(sid, title, yog, email);
-  let portfolioId = getIdFromUrl(url);
-  return DriveApp.getFolderById(portfolioId);
+  if (url) {
+    let portfolioId = getIdFromUrl(url);
+    return ensureUntrashedFolder(DriveApp.getFolderById(portfolioId));
+  }
+}
+
+function ensureUntrashedFolder (folder) {  
+  if (folder.isTrashed()) {
+    console.warn(`Folder ${folder.getId()} was trashed; un-trashing!`);
+    folder.setTrashed(false);
+  }
+  return folder;
 }
 
 function getCommonFolder(key, displayName, parent) {
@@ -33,7 +43,7 @@ function getCommonFolder(key, displayName, parent) {
     folder = createFolder();
     folder.moveTo(parent);
   }
-  return folder;
+  return ensureUntrashedFolder(folder);
 
   function getFolderFromProps(key) {
     if (props.getProperty(key)) {
@@ -148,7 +158,7 @@ function getPortfolioSpreadsheet() {
 function getYOGFolder(yog) {
   let title = `${yog} Portfolios`;
   let parent = getCommonFolder(PORTFOLIO_HOME, PORTFOLIO_HOME);
-  let yogFolder = getCommonFolder(yog, title, parent);
+  let yogFolder = getCommonFolder(title, title, parent);
   return yogFolder;
 }
 
@@ -178,6 +188,8 @@ function setupCoreSheet() {
   settingsDataSheet.updateRow({ key: "PORTFOLIO_HOME", url: home.getUrl() });
 }
 
+
+
 function createPortfolio(title, yog, sid, email) {
   let yogFolder = getYOGFolder(yog);
   let portfolioFolder = getCommonFolder(sid, title, yogFolder);
@@ -189,9 +201,9 @@ function createPortfolio(title, yog, sid, email) {
 
 function testCreate() {
   createPortfolio(
-    "Tom Hinkle - test Portfolio",
+    "Tom's Test",
     "1997",
-    "02-21-79",
+    787878788,
     "thinkle@innovationcharter.org"
   );
 }
