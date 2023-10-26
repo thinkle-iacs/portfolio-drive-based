@@ -19,13 +19,14 @@ function migrateOldPortfolios() {
     MIGRATION_COLUMNS
   );
   for (let rn = 1; rn < migrationSheet.length; rn++) {
+ // for (let rn = 1; rn < 17; rn++) {
     let row = migrationSheet[rn];
     if (!row.migrated) {
       let sitesInfo = validateSitesUrl(row.url);
       if (sitesInfo) {
         let folder = getPortfolioFolder(row.sid, row.title, row.yog, row.email);
         if (folder) {
-          let doc = createSitesDoc(row.title, sitesInfo.url, sitesInfo.title);
+          let doc = createSitesDoc(row.title || folder.getName(), sitesInfo.url, sitesInfo.title);
           doc.moveTo(folder);
           row.migrated = folder.getUrl();
         } else {
