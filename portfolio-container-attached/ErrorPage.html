@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 16px;
+      }
+      p {
+        margin-bottom: 20px;
+      }
+      details {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 6px;
+        margin-bottom: 16px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .error {
+        margin-top: 10px;
+      }
+      .error h2 {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+      .error pre {
+        background-color: #f4f4f4;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <p><?= msg ?></p>
+    <details>
+      <summary>More Details</summary>
+      <p><?= detail ?></p>
+      <div class="error">
+        <h2><b><?= errorName ?></h2>
+        <p><?= errorMessage ?></p>
+        <pre><?= errorStack ?></pre>
+      </div>
+    </details>
+   
+  </body>
+</html>

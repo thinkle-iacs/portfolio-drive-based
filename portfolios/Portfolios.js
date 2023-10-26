@@ -17,52 +17,109 @@ function getPortfolioFolder(sid, title, yog, email) {
   return DriveApp.getFolderById(portfolioId);
 }
 
-function getCommonFolder(key, parent) {
+function getCommonFolder(key, displayName, parent) {
   // Try to grab folder info from PropertiesService
   // cached info...
-  let props = PropertiesService.getScriptProperties();
-  if (props.getProperty(key)) {
-    let value = props.getProperty(key);
-    console.log("Get prop...", value);
-    let folder = DriveApp.getFolderById(value);
-    if (parent) {
-      folder.moveTo(parent);
+  const props = PropertiesService.getScriptProperties();
+  let folder =
+    getHardcodedFolder(key) ||
+    getFolderFromProps(key) ||
+    getFolderFromSheet(key);
+  // Check if folder parent is parent
+  if (folder && parent) {
+    maybeMoveExistingFolder(folder, parent);
+  }
+  if (!folder) {
+    folder = createFolder();
+    folder.moveTo(parent);
+  }
+  return folder;
+
+  function getFolderFromProps(key) {
+    if (props.getProperty(key)) {
+      let value = props.getProperty(key);
+      console.log("Get prop...", value);
+      return DriveApp.getFolderById(value);
     }
-    return folder;
-  } else {
-    let folder;
+  }
+
+  function getFolderFromSheet(key) {
+    let folderDataSheet = getFolderDataSheet();
+    let existing = folderDataSheet.getRow(key);
+    if (existing) {
+      try {
+        return DriveApp.getFolderById(existing.folderId);
+      } catch (err) {
+        console.warn(
+          `Unable to find folder ${existing.folderId} stored in folder sheet for key ${key}`
+        );
+        showErrorToUser(
+          "Can't Access Folder",
+          `Unable to access folder ${displayName} (${key}).`,
+          `Found stored ID ${existing.folderId} in "Folders" tab of our master Portfolio Sheet`,
+          err
+        );
+        throw err;
+      }
+    }
+  }
+
+  function getHardcodedFolder(key) {
     // If it's our hard-coded HOME, we go with that!
     if (key == PORTFOLIO_HOME && PORTFOLIO_HOME_HARDCODED) {
       let id = getIdFromUrl(PORTFOLIO_HOME_HARDCODED);
-      folder = DriveApp.getFolderById(id);
-    } else {
-      // Ok, if not... check our data sheet
-      let folderDataSheet = getFolderDataSheet();
-      let existing = folderDataSheet.getRow(key);
-      if (existing) {
-        let folder = DriveApp.getFolderById(existing.folderId);
-        if (!folder) {
-          throw Error(
-            `Unable to find folder ${existing.folderId} stored in folder sheet for key ${key}`
-          );
-        }
-        return folder;
-      } else {
-        // Create folder!
-        folder = DriveApp.createFolder(key);
-        if (parent) {
-          folder.moveTo(parent);
-        }
-        // Now cache it in props...
-        let id = folder.getId();
-        props.setProperty(key, id);
-        // And in our sheet...
-        let scriptId = ScriptApp.getScriptId();
-        folderDataSheet.pushRow({ key, scriptId, folderId: id });
+      try {
+        return DriveApp.getFolderById(id);
+      } catch (err) {
+        showErrorToUser(
+          "Can't Access Folder",
+          "Unable to access folder ${displayName} (${key})",
+          `Looking for hard-coded ID: ${id}`,
+          err
+        );
+        console.warn("Unable to access hardcoded folder ID");
+        throw err;
       }
     }
+  }
 
+  function createFolder() {
+    // Create folder!
+    let folder = DriveApp.createFolder(displayName);
+    if (parent) {
+      folder.moveTo(parent);
+    }
+    // Now cache it in props...
+    let id = folder.getId();
+    props.setProperty(key, id);
+    // And in our sheet...
+    let scriptId = ScriptApp.getScriptId();
+    let folderDataSheet = getFolderDataSheet();
+    folderDataSheet.pushRow({
+      key,
+      scriptId,
+      displayName,
+      folderId: id,
+    });
     return folder;
+  }
+
+  function maybeMoveExistingFolder(folder, parent) {
+    let parents = folder.getParents();
+    const folderParent = parents.hasNext() && parents.next();
+    // We move the folder if there's no current parent OR if
+    // the current parent is wrong
+    if (!(folderParent && folderParent.getId() === parent.getId())) {
+      folder.moveTo(parent);
+      if (folderParent) {
+        // Warn If we moved it.
+        console.warn(
+          `Moved folder ${folder.getName()} from ${folderParent.getName()} to ${parent.getName()}
+        ${folderParent.getId()}=>${parent.getId()}
+        `
+        );
+      }
+    }
   }
 }
 
@@ -80,7 +137,9 @@ function getPortfolioSpreadsheet() {
       sheet = SpreadsheetApp.create(PORTFOLIO_SHEET);
     }
     let id = sheet.getId();
-    DriveApp.getFileById(id).moveTo(getCommonFolder(PORTFOLIO_HOME));
+    DriveApp.getFileById(id).moveTo(
+      getCommonFolder(PORTFOLIO_HOME, PORTFOLIO_HOME)
+    );
     props.setProperty(PORTFOLIO_SHEET, id);
     return sheet;
   }
@@ -88,8 +147,8 @@ function getPortfolioSpreadsheet() {
 
 function getYOGFolder(yog) {
   let title = `${yog} Portfolios`;
-  let parent = getCommonFolder("IACS Portfolios");
-  let yogFolder = getCommonFolder(title, parent);
+  let parent = getCommonFolder(PORTFOLIO_HOME, PORTFOLIO_HOME);
+  let yogFolder = getCommonFolder(yog, title, parent);
   return yogFolder;
 }
 
@@ -115,13 +174,13 @@ function setupCoreSheet() {
     key: "PORTFOLIO_DATA_SHEET",
     url: sheet.getUrl(),
   });
-  let home = getCommonFolder(PORTFOLIO_HOME);
+  let home = getCommonFolder(PORTFOLIO_HOME, PORTFOLIO_HOME);
   settingsDataSheet.updateRow({ key: "PORTFOLIO_HOME", url: home.getUrl() });
 }
 
 function createPortfolio(title, yog, sid, email) {
   let yogFolder = getYOGFolder(yog);
-  let portfolioFolder = getCommonFolder(title, yogFolder);
+  let portfolioFolder = getCommonFolder(sid, title, yogFolder);
   let portfolioDataSheet = getPortfolioDataSheet();
   let url = portfolioFolder.getUrl();
   portfolioDataSheet.updateRow({ url, email, title, yog, sid });
