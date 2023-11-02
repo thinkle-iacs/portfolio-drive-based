@@ -19,7 +19,7 @@ function getPortfolioFolder(sid, title, yog, email) {
   }
 }
 
-function ensureUntrashedFolder (folder) {  
+function ensureUntrashedFolder(folder) {
   if (folder.isTrashed()) {
     console.warn(`Folder ${folder.getId()} was trashed; un-trashing!`);
     folder.setTrashed(false);
@@ -161,13 +161,13 @@ function getYOGFolder(yog) {
   let yogFolder = getCommonFolder(title, title, parent);
   return yogFolder;
 }
-
+const EXPORTED_TO_ASPEN = "exported";
 function getPortfolioDataSheet() {
   let portfolioSheet = getPortfolioSpreadsheet();
   return DataSheet(
     portfolioSheet,
     "Portfolios",
-    ["sid", "email", "title", "yog", "url"],
+    ["sid", "email", "title", "yog", "url", "shared", EXPORTED_TO_ASPEN],
     "sid"
   );
 }
@@ -187,8 +187,6 @@ function setupCoreSheet() {
   let home = getCommonFolder(PORTFOLIO_HOME, PORTFOLIO_HOME);
   settingsDataSheet.updateRow({ key: "PORTFOLIO_HOME", url: home.getUrl() });
 }
-
-
 
 function createPortfolio(title, yog, sid, email) {
   let yogFolder = getYOGFolder(yog);
