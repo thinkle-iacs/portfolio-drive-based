@@ -27,9 +27,9 @@ function createDPAspenImportCsvFiles(data) {
   let urlCsv = data.map((row) => `${fixLasid(row.sid)},${row.url}`).join("\n");
   let linkCsv = data.map(
     (row) => `${fixLasid(row.sid)},<a href="${row.url}">${row.url}</a>`
-  );
+  ).join('\n');
   writeData("DPImport.csv", urlCsv);
-  writeData("DPLinkExport.csv", linkCsv);
+  writeData("DPLinkImport.csv", linkCsv);
 }
 
 function fixLasid(id) {
@@ -56,10 +56,11 @@ From there we can import to X2 :)
 ***/
 
 function writeData(fileName, data) {
+  var outputFolderId = "0B_Wihdetm5vOanJqaVBMZ0dzZUE";
+
   file = getOrCreateFile(fileName);
   file.setContent(data);
 
-  var outputFolderId = "0B_Wihdetm5vOanJqaVBMZ0dzZUE";
 
   function getOrCreateFile(fileName) {
     folder = DriveApp.getFolderById(outputFolderId);
