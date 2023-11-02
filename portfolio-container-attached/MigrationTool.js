@@ -9,16 +9,7 @@
  * => If it does not exist, we will REMOVE it from the folder.
  */
 
-const MIGRATION_COLUMNS = [
-  "sid",
-  "email",
-  "url",
-  "title",
-  "yog",
-  "share",
-  "shared",
-  "migrated",
-];
+const MIGRATION_COLUMNS = ["sid", "email", "url", "title", "yog", "migrated"];
 
 function migrateOldPortfolios() {
   let portfolioSheet = getPortfolioSpreadsheet();
@@ -28,15 +19,22 @@ function migrateOldPortfolios() {
     MIGRATION_COLUMNS
   );
   for (let rn = 1; rn < migrationSheet.length; rn++) {
+ // for (let rn = 1; rn < 17; rn++) {
     let row = migrationSheet[rn];
     if (!row.migrated) {
       let sitesInfo = validateSitesUrl(row.url);
       if (sitesInfo) {
-        let doc = createSitesDoc(row.title, sitesInfo.url, sitesInfo.title);
         let folder = getPortfolioFolder(row.sid, row.title, row.yog, row.email);
-        doc.moveTo(folder);
+        if (folder) {
+          let doc = createSitesDoc(row.title || folder.getName(), sitesInfo.url, sitesInfo.title);
+          doc.moveTo(folder);
+          row.migrated = folder.getUrl();
+        } else {
+          row.migrated = "Portfolio not found/created";
+        }
+      } else {
+        row.migrated = 'Unable to access/validate site :-('
       }
-      row.migrated = sitesInfo.url;
     }
   }
 }
@@ -70,9 +68,8 @@ function validateSitesUrl(url) {
         title: titleMatch[1],
       };
     }
-    debugger;
   } catch (err) {
-    console.log("Hit error", err);
+    console.error(`Hit error fetching url ${url}`, err);
     return null;
   }
 }
