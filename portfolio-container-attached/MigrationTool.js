@@ -18,22 +18,26 @@ function migrateOldPortfolios() {
     "Migration",
     MIGRATION_COLUMNS
   );
+
   for (let rn = 1; rn < migrationSheet.length; rn++) {
- // for (let rn = 1; rn < 17; rn++) {
     let row = migrationSheet[rn];
     if (!row.migrated) {
       let sitesInfo = validateSitesUrl(row.url);
       if (sitesInfo) {
         let folder = getPortfolioFolder(row.sid, row.title, row.yog, row.email);
         if (folder) {
-          let doc = createSitesDoc(row.title || folder.getName(), sitesInfo.url, sitesInfo.title);
+          let doc = createSitesDoc(
+            row.title || folder.getName(),
+            sitesInfo.url,
+            sitesInfo.title
+          );
           doc.moveTo(folder);
           row.migrated = folder.getUrl();
         } else {
           row.migrated = "Portfolio not found/created";
         }
       } else {
-        row.migrated = 'Unable to access/validate site :-('
+        row.migrated = "Unable to access/validate site :-(";
       }
     }
   }
