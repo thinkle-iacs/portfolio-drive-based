@@ -39,8 +39,9 @@ function createShortcutsFromSheet() {
         row[SC_SUB_COL]
       );
       let parents = row[SC_SUB_COL].split(/\s*,\s*/);
-      console.log("Parnets:", parents);
+      console.log("Parents:", parents);
       row[SC_COMPLETE] = addShortcut(row[SID], row[SC_ROOT_COL], parents);
+      updateUiEvery(2);
     }
   }
 }

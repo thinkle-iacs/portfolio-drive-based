@@ -205,8 +205,8 @@ function testCreate() {
     "thinkle@innovationcharter.org"
   );
 }
-
-function sharePortfolio(sid) {
+const DEFAULT_MESSAGE = `This google drive folder is your portfolio. Please add a shortcut to it to your drive so you'll be able to find it and add to it when your teachers ask you to.`;
+function sharePortfolio(sid, msg = DEFAULT_MESSAGE) {
   let dataSheet = getPortfolioDataSheet();
   let row = dataSheet.getRow(sid);
   if (!row) {
@@ -218,8 +218,7 @@ function sharePortfolio(sid) {
     folder.getId(),
     {
       sendNotificationsEmail: "true",
-      emailMessage:
-        "This google drive folder is your portfolio. Please add a shortcut to it to your drive so you'll be able to find it and add to it when your teachers ask you to.",
+      emailMessage: msg,
     }
   );
   dataSheet.updateRow({ sid, shared: true });
