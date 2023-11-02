@@ -1,100 +1,109 @@
-function createPortfolioMenu (ui) {
-  let menu = ui.createMenu(
-    "New Portfolios"
-  )
-  .addItem(
-    'Set up portfolio sheet','formatPortfolioSheet'
-  )
-  .addItem(
-      "Add portfolios","addPortfoliosInteractive"
-    )
-  .addItem(
-    'Share Portfolios','sharePortfoliosInteractive'
-  );
+function createPortfolioMenu(ui) {
+  let menu = ui
+    .createMenu("New Portfolios")
+    .addItem("Set up portfolio sheet", "formatPortfolioSheet")
+    .addItem("Add portfolios", "addPortfoliosInteractive")
+    .addItem("Share Portfolios", "sharePortfoliosInteractive");
   return menu;
 }
 
-
-
 //let SID = "Student ID";
-let EMAIL = 'Student Email';
-let First = 'First';
-let Last = 'Last';
-//let YOG = 'YOG';
-let TITLE = 'Title';
-//let COMPLETE = 'Created';
-let URL = 'URL';
-let SHARE = 'Share (FORCE|TRUE|False)';
-let SHARED = 'Shared'
-
-function getContainerPortfolioSheet () {
+const PM_EMAIL = "Student PM_EMAIL";
+const PM_FIRST = "First";
+const PM_LAST = "Last";
+const PM_YOG = "YOG";
+const PM_TITLE = "Title";
+const PM_COMPLETE = "Created";
+const PM_URL = "URL";
+const PM_SHARE = "Share (FORCE|TRUE|False)";
+const PM_SHARED = "Shared";
+const PM_MESSAGE = "Message";
+function getContainerPortfolioSheet() {
   let ss = SpreadsheetApp.getActiveSpreadsheet();
-  let dataSheet = DataSheet(ss,"New Portfolios",[SID,EMAIL,First,Last,YOG,TITLE,COMPLETE,URL,SHARE,SHARED])
-  return dataSheet
+  let dataSheet = DataSheet(ss, "New Portfolios", [
+    SID,
+    PM_EMAIL,
+    PM_FIRST,
+    PM_LAST,
+    PM_YOG,
+    PM_TITLE,
+    PM_COMPLETE,
+    PM_URL,
+    PM_MESSAGE,
+    PM_SHARE,
+    PM_SHARED,
+  ]);
+  return dataSheet;
 }
 
-function formatPortfolioSheet () {
+function formatPortfolioSheet() {
   let dataSheet = getContainerPortfolioSheet();
   let sheet = dataSheet.sheet;
   sheet.setFrozenRows(1);
 }
 
-function addPortfoliosInteractive () {
+function addPortfoliosInteractive() {
   let dataSheet = getContainerPortfolioSheet();
-  for (let rn=1; rn<dataSheet.length; rn++) {
+  for (let rn = 1; rn < dataSheet.length; rn++) {
     let row = dataSheet[rn];
-    if (!row[COMPLETE] && row[TITLE] && row[SID] && row[Email]) {
-      let url
+    if (!row[PM_COMPLETE] && row[PM_TITLE] && row[SID] && row[PM_EMAIL]) {
+      let url;
       try {
-        url = getPortfolioUrl(row[SID],row[TITLE],row[YOG],row[EMAIL]);        
+        url = getPortfolioUrl(
+          row[SID],
+          row[PM_TITLE],
+          row[PM_YOG],
+          row[PM_EMAIL]
+        );
       } catch (err) {
-        console.log('Error creating portfolio for row',row);
+        console.log("Error creating portfolio for row", row);
         console.log(err);
-        row[COMPLETE] = `Error: ${err}`;
+        row[PM_COMPLETE] = `Error: ${err}`;
         return;
       }
       if (url) {
-        row[COMPLETE] = true;
+        row[PM_COMPLETE] = true;
         row[URL] = url;
       } else {
-        row[COMPLETE] = false;
+        row[PM_COMPLETE] = false;
       }
+      updateUiEvery(10);
     }
   }
 }
 
-
-function sharePortfoliosInteractive () {
+function sharePortfoliosInteractive() {
   let dataSheet = getContainerPortfolioSheet(); // container-attached sheet
   let portfolioDataSheet = getPortfolioDataSheet(); // permanent big sheet
-  for (let rn=1; rn<dataSheet.length; rn++) {
+  for (let rn = 1; rn < dataSheet.length; rn++) {
     let row = dataSheet[rn];
-    if (row[URL] && !row[SHARED] && row[SHARE] && row[SHARE]) {       
+    if (row[PM_URL] && !row[PM_SHARED] && row[PM_SHARE] && row[PM_SHARE]) {
       let existing = portfolioDataSheet.getRow(row[SID]);
-      if (!existing.shared || row[SHARE]=='FORCE') {
-        console.log("Sharing!")
-        if (row[EMAIL] != existing.email) {
-          console.log('Warning: email conflict?');
-          // Go ahead and prompt the user, let them know about the two emails...
-          // if they confirm, then set the row.email to the existing email
+      if (!existing.shared || row[PM_SHARE] == "FORCE") {
+        console.log("Sharing!");
+        if (row[PM_EMAIL] != existing.PM_EMAIL) {
+          console.log("Warning: PM_EMAIL conflict?");
+          // Go ahead and prompt the user, let them know about the two PM_EMAILs...
+          // if they confirm, then set the row.PM_EMAIL to the existing PM_EMAIL
           // and in that case, do a flush to update the spreadsheet
-           // Show dialog box
+          // Show dialog box
           let response = ui.alert(
-            'Email Conflict',
-            `The email in the sheet here (${row[EMAIL]}) is different from email we already have on file (${existing.email}). Do you want to use the new email and update our records to reference that one instead?`,
+            "PM_EMAIL Conflict",
+            `The PM_EMAIL in the sheet here (${row[PM_EMAIL]}) is different from PM_EMAIL we already have on file (${existing.PM_EMAIL}). Do you want to use the new PM_EMAIL and update our records to reference that one instead?`,
             ui.ButtonSet.YES_NO
           );
-          
+
           // Handle response
           if (response === ui.Button.YES) {
-            existing.email = row[EMAIL];            
+            existing.PM_EMAIL = row[PM_EMAIL];
             SpreadsheetApp.flush();
           } else {
-            row[EMAIL] = existing.email;
+            row[PM_EMAIL] = existing.PM_EMAIL;
           }
-        }        
-        sharePortfolio(row[SID]);
-        row[SHARED] = true;
+        }
+        sharePortfolio(row[SID], row[PM_MESSAGE]);
+        row[PM_SHARED] = true;
+        updateUiEvery(10);
       }
     }
   }
