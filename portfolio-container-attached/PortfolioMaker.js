@@ -8,7 +8,7 @@ function createPortfolioMenu(ui) {
 }
 
 //let SID = "Student ID";
-const PM_EMAIL = "Student PM_EMAIL";
+const PM_EMAIL = "Student Email";
 const PM_FIRST = "First";
 const PM_LAST = "Last";
 const PM_YOG = "YOG";
@@ -46,6 +46,14 @@ function addPortfoliosInteractive() {
   let dataSheet = getContainerPortfolioSheet();
   for (let rn = 1; rn < dataSheet.length; rn++) {
     let row = dataSheet[rn];
+    console.log(
+      "Checking ROW",
+      row[PM_TITLE],
+      row[SID],
+      row[PM_EMAIL],
+      "=>",
+      row[PM_COMPLETE]
+    );
     if (!row[PM_COMPLETE] && row[PM_TITLE] && row[SID] && row[PM_EMAIL]) {
       let url;
       try {
@@ -63,7 +71,7 @@ function addPortfoliosInteractive() {
       }
       if (url) {
         row[PM_COMPLETE] = true;
-        row[URL] = url;
+        row[PM_URL] = url;
       } else {
         row[PM_COMPLETE] = false;
       }
@@ -74,6 +82,7 @@ function addPortfoliosInteractive() {
 
 function sharePortfoliosInteractive() {
   let dataSheet = getContainerPortfolioSheet(); // container-attached sheet
+  let ui = SpreadsheetApp.getUi();
   let portfolioDataSheet = getPortfolioDataSheet(); // permanent big sheet
   for (let rn = 1; rn < dataSheet.length; rn++) {
     let row = dataSheet[rn];
@@ -81,24 +90,24 @@ function sharePortfoliosInteractive() {
       let existing = portfolioDataSheet.getRow(row[SID]);
       if (!existing.shared || row[PM_SHARE] == "FORCE") {
         console.log("Sharing!");
-        if (row[PM_EMAIL] != existing.PM_EMAIL) {
-          console.log("Warning: PM_EMAIL conflict?");
+        if (row[PM_EMAIL] != existing.email) {
+          console.log("Warning: Email conflict?");
           // Go ahead and prompt the user, let them know about the two PM_EMAILs...
           // if they confirm, then set the row.PM_EMAIL to the existing PM_EMAIL
           // and in that case, do a flush to update the spreadsheet
           // Show dialog box
           let response = ui.alert(
-            "PM_EMAIL Conflict",
-            `The PM_EMAIL in the sheet here (${row[PM_EMAIL]}) is different from PM_EMAIL we already have on file (${existing.PM_EMAIL}). Do you want to use the new PM_EMAIL and update our records to reference that one instead?`,
+            "Email Conflict",
+            `The Email in the sheet here (${row[PM_EMAIL]}) is different from Email we already have on file (${existing.email}). Do you want to use the new Email and update our records to reference that one instead?`,
             ui.ButtonSet.YES_NO
           );
 
           // Handle response
           if (response === ui.Button.YES) {
-            existing.PM_EMAIL = row[PM_EMAIL];
+            existing.email = row[PM_EMAIL];
             SpreadsheetApp.flush();
           } else {
-            row[PM_EMAIL] = existing.PM_EMAIL;
+            row[PM_EMAIL] = existing.email;
           }
         }
         sharePortfolio(row[SID], row[PM_MESSAGE]);
