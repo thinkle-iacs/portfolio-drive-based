@@ -162,14 +162,19 @@ function getYOGFolder(yog) {
   return yogFolder;
 }
 
+let cachedDataSheet = null;
 function getPortfolioDataSheet() {
+  if (cachedDataSheet) {
+    return cachedDataSheet;
+  }
   let portfolioSheet = getPortfolioSpreadsheet();
-  return DataSheet(
+  cachedDataSheet = DataSheet(
     portfolioSheet,
     "Portfolios",
     ["sid", "email", "title", "yog", "url"],
     "sid"
   );
+  return cachedDataSheet;
 }
 
 function getFolderDataSheet() {
