@@ -11,3 +11,13 @@ function updateUiEvery(n) {
     SpreadsheetApp.flush();
   }
 }
+
+function lasEq (a, b) {
+  let aString = `${a}`;
+  let bString = `${b}`;
+  if (aString.trim() == bString.trim()) return true;
+  aString = aString.replace(/^0/,'');
+  bString = bString.replace(/^0/,'');
+  return aString == bString;
+}
+

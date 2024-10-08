@@ -4,10 +4,12 @@ function onOpen(e) {
   let shortcutMenu = createShortcutMenu(ui);
   let portfolioMenu = createPortfolioMenu(ui);
   let deleteMenu = createDeleteMenu(ui);
+  let yogMenu = createYOGTemplateMenu(ui);
   ui.createMenu("IACS Portfolios")
     .addItem("Authorize", "authorizeScript")
     .addSeparator()
     .addSubMenu(templateMenu)
+    .addSubMenu(yogMenu)
     .addSubMenu(shortcutMenu)
     .addSubMenu(portfolioMenu)
     .addSubMenu(deleteMenu)

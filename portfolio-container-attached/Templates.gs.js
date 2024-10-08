@@ -1,3 +1,8 @@
+/**
+ * @function getNamedChildFolder
+ * @global
+ */
+
 function getNamedChildFolder(parent, name) {
   let matching = parent.getFoldersByName(name);
   if (matching.hasNext()) {
@@ -7,6 +12,10 @@ function getNamedChildFolder(parent, name) {
   }
 }
 
+/**
+ * @function addTemplate
+ * @global
+ */
 function addTemplate(sid, templateUrl, parentNames, suffix = "") {
   let portfolio = getPortfolioFolder(sid);
   if (portfolio) {
