@@ -76,6 +76,25 @@ function checkForNewStudents() {
       [PM_SHARE]: "TRUE",
       [PM_YOG]: YOG,
     });    
+    let templatesByYOG = getTemplatesByYOG();
+    if (templatesByYOG[YOG]) {
+      let templates = templatesByYOG[YOG];
+      for (let template of templates) {
+        if (template.endDate && new Date() > new Date(template.endDate)) {
+          console.log('Template expired, skipping:', template);
+          continue
+        }
+         templateSheet.pushRow({
+           [TURL]: template.template,
+           [Email]: Email,
+           [PARENTS]: template.parents,
+           [COMPLETE]: false,
+           [SID]: LASID,
+           [NAME]: Name,
+           [YOG]: YOG,
+         });    
+      }
+    }
   }
 }
 
